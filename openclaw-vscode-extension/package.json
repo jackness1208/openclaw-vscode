@@ -1,0 +1,116 @@
+{
+    "name": "openclaw-vscode-extension",
+    "displayName": "OpenClaw",
+    "description": "OpenClaw AI Assistant for VS Code - Multi-agent conversation with Gateway integration",
+    "version": "0.1.0",
+    "license": "MIT",
+    "engines": {
+        "vscode": "^1.52.0"
+    },
+    "publisher": "openclaw",
+    "icon": "images/extension-icon.png",
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "OpenClaw",
+        "AI",
+        "Agent",
+        "Chat"
+    ],
+    "repository": "https://github.com/openclaw/openclaw-vscode/",
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "lib/extension",
+    "files": [
+        "lib",
+        "pack"
+    ],
+    "contributes": {
+        "commands": [
+            {
+                "command": "openclaw.refresh",
+                "title": "Refresh",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "openclaw.clearChat",
+                "title": "Clear Chat",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "openclaw.gateway.connect",
+                "title": "Connect to Gateway"
+            },
+            {
+                "command": "openclaw.gateway.disconnect",
+                "title": "Disconnect from Gateway"
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "openclaw-explorer",
+                    "title": "OpenClaw",
+                    "icon": "assets/media/chat-icon.svg"
+                }
+            ]
+        },
+        "views": {
+            "openclaw-explorer": [
+                {
+                    "type": "webview",
+                    "id": "openclaw.chatView",
+                    "name": "Chat"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "OpenClaw",
+            "properties": {
+                "openclaw.defaultAgent": {
+                    "type": "string",
+                    "default": "main",
+                    "description": "Default agent to use for conversations"
+                },
+                "openclaw.configPath": {
+                    "type": "string",
+                    "default": "~/.openclaw/openclaw.json",
+                    "description": "Path to OpenClaw configuration file"
+                }
+            }
+        }
+    },
+    "dependencies": {
+        "@vscode/codicons": "^0.0.33",
+        "uuid": "^9.0.0",
+        "vscode-messenger": "^0.5.0",
+        "openclaw-vscode-common": "0.1.0"
+    },
+    "devDependencies": {
+        "@types/node": "^18.0.0",
+        "@types/uuid": "^9.0.0",
+        "@types/vscode": "^1.52.0",
+        "@typescript-eslint/eslint-plugin": "^6.0.0",
+        "@typescript-eslint/parser": "^6.0.0",
+        "css-loader": "^5.0.1",
+        "eslint": "^8.43.0",
+        "rimraf": "^5.0.0",
+        "style-loader": "^2.0.0",
+        "ts-loader": "^8.0.14",
+        "typescript": "^5.0.0"
+    },
+    "scripts": {
+        "prepare": "yarn run clean && yarn run build && yarn run webpack",
+        "clean": "rimraf lib",
+        "build": "tsc -p tsconfig.json",
+        "webpack": "webpack --mode development",
+        "webpack:production": "webpack --mode production",
+        "vscode:prepublish": "yarn prepare && yarn run webpack:production",
+        "vsce:package": "vsce package --yarn",
+        "watch": "webpack --mode development --watch",
+        "lint": "eslint src --ext .ts,.tsx",
+        "format:write": "prettier --write ./src"
+    }
+}

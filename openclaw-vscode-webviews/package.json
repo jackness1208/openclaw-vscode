@@ -1,0 +1,40 @@
+{
+    "name": "openclaw-vscode-webviews",
+    "private": true,
+    "version": "0.1.0",
+    "repository": "https://github.com/openclaw/openclaw-vscode/",
+    "dependencies": {
+        "@emotion/react": "^11.10.5",
+        "@emotion/styled": "^11.10.5",
+        "@mui/material": "^5.10.14",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "uuid": "^9.0.0",
+        "vscode-messenger-webview": "^0.5.0",
+        "openclaw-vscode-common": "0.1.0",
+        "zustand": "^4.5.0"
+    },
+    "devDependencies": {
+        "@types/node": "^18.0.0",
+        "@types/react": "^18.0.0",
+        "@types/react-dom": "^18.0.0",
+        "@types/uuid": "^9.0.0",
+        "@typescript-eslint/eslint-plugin": "^6.0.0",
+        "@typescript-eslint/parser": "^6.0.0",
+        "css-loader": "^5.0.1",
+        "rimraf": "^5.0.0",
+        "style-loader": "^2.0.0",
+        "ts-loader": "^8.0.14",
+        "typescript": "^5.0.0"
+    },
+    "scripts": {
+        "prepare": "yarn run clean && yarn run build && yarn run webpack",
+        "clean": "rimraf lib pack",
+        "build": "tsc -b",
+        "webpack": "webpack --mode development",
+        "vsce:package": "yarn run prepare",
+        "watch": "webpack --watch --mode development",
+        "lint": "eslint src --ext .ts,.tsx",
+        "format:write": "prettier --write ./src"
+    }
+}

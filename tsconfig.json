@@ -6,19 +6,13 @@
     },
     "references": [
         {
-            "path": "local-libs/traceviewer-libs/base"
+            "path": "openclaw-vscode-common"
         },
         {
-            "path": "local-libs/traceviewer-libs/react-components"
+            "path": "openclaw-vscode-extension"
         },
         {
-            "path": "vscode-trace-common"
-        },
-        {
-            "path": "vscode-trace-extension"
-        },
-        {
-            "path": "vscode-trace-webviews"
+            "path": "openclaw-vscode-webviews"
         }
     ]
 }
