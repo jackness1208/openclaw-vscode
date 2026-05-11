@@ -1,0 +1,62 @@
+/**
+ * Message Input Component Styles
+ */
+
+.message-input {
+    display: flex;
+    align-items: flex-end;
+    padding: var(--openclaw-padding-sm) var(--openclaw-padding-md);
+    border-top: 1px solid var(--openclaw-border-primary);
+    gap: 6px;
+}
+
+.message-input__textarea {
+    flex: 1;
+    background: var(--openclaw-background-input);
+    color: var(--openclaw-foreground-input);
+    border: 1px solid var(--openclaw-border-input);
+    border-radius: var(--openclaw-radius-sm);
+    padding: 4px 8px;
+    font-size: var(--openclaw-font-size);
+    font-family: var(--openclaw-font-family);
+    resize: none;
+    outline: none;
+    min-height: var(--openclaw-input-min-height);
+    max-height: var(--openclaw-input-max-height);
+    line-height: 1.4;
+}
+
+.message-input__textarea:focus {
+    border-color: var(--vscode-focusBorder);
+}
+
+.message-input__textarea::placeholder {
+    color: var(--openclaw-foreground-placeholder);
+}
+
+.message-input__textarea:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.message-input__button {
+    background: var(--openclaw-background-button);
+    color: var(--openclaw-foreground-button);
+    border: none;
+    border-radius: var(--openclaw-radius-sm);
+    padding: 4px 12px;
+    font-size: var(--openclaw-font-size);
+    font-family: var(--openclaw-font-family);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.message-input__button:hover:not(:disabled) {
+    background: var(--openclaw-background-button-hover);
+}
+
+.message-input__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

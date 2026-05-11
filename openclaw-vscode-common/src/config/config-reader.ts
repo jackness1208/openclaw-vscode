@@ -34,7 +34,7 @@ export function readOpenClawConfig(): GatewayConfig | null {
         
         const host = config.gateway?.host || '127.0.0.1';
         const port = config.gateway?.port || 18789;
-        const token = config.gateway?.token || '';
+        const token = config.gateway?.auth?.token || config.gateway?.token || '';
         
         return {
             gatewayUrl: `ws://${host}:${port}`,

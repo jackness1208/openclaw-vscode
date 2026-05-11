@@ -109,9 +109,19 @@ export interface ChatMessageItem {
 }
 
 export interface ChatEventMessage {
-    sessionId: string;
-    agentId: string;
-    chunk?: string;
-    done?: boolean;
-    error?: string;
+    runId: string;
+    sessionKey: string;
+    seq: number;
+    state: 'delta' | 'final' | 'aborted' | 'error';
+    message?: {
+        role: 'assistant';
+        content: Array<{
+            type: 'text';
+            text: string;
+        }>;
+        timestamp: number;
+    };
+    errorMessage?: string;
+    errorKind?: string;
+    stopReason?: string;
 }

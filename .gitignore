@@ -41,3 +41,4 @@ lerna-error.log*
 *.tsbuildinfo
 
 license-check-summary.txt*
+dist/

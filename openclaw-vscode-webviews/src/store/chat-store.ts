@@ -122,14 +122,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const state = get();
     const agent = state.currentAgent();
     if (!agent) return;
-    
+
     get().addMessage({
       role: 'user',
       content: text,
       agentId: agent.id
     });
-    
+
     set({ isLoading: true, streamingContent: '' });
-    // The actual sending is handled by the component
+    // The actual sending is handled by ChatContainer via messageManager
   }
 }));

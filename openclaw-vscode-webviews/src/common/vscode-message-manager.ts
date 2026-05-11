@@ -15,11 +15,9 @@ import {
     getAgents,
     sendMessage as sendMessageType,
     switchAgent,
-    clearChat,
-    AgentMessage,
-    ChatEventMessage,
-    ChatMessageItem
-} from 'openclaw-vscode-common';
+    clearChat
+} from 'openclaw-vscode-common/lib/messages/vscode-messages';
+import type { AgentMessage, ChatEventMessage, ChatMessageItem } from 'openclaw-vscode-common/lib/messages/vscode-messages';
 
 export class VsCodeMessageManager {
     private messenger: Messenger;

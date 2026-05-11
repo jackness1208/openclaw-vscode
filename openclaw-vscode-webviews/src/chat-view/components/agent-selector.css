@@ -1,0 +1,40 @@
+/**
+ * Agent Selector Component Styles
+ */
+
+.agent-selector {
+    padding: var(--openclaw-padding-md) var(--openclaw-padding-md) var(--openclaw-padding-sm);
+    border-bottom: 1px solid var(--openclaw-border-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--openclaw-padding-md);
+}
+
+.agent-selector__label {
+    font-size: 12px;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.agent-selector__select {
+    flex: 1;
+    background: var(--openclaw-background-input);
+    color: var(--openclaw-foreground-input);
+    border: 1px solid var(--openclaw-border-input);
+    border-radius: var(--openclaw-radius-sm);
+    padding: 2px 6px;
+    font-size: var(--openclaw-font-size);
+    font-family: var(--openclaw-font-family);
+    outline: none;
+    cursor: pointer;
+}
+
+.agent-selector__select:focus {
+    border-color: var(--vscode-focusBorder);
+}
+
+.agent-selector__empty {
+    padding: var(--openclaw-padding-sm) var(--openclaw-padding-md);
+    font-size: 12px;
+    opacity: 0.6;
+}

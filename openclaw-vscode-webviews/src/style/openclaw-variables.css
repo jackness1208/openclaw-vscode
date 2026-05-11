@@ -1,0 +1,48 @@
+/**
+ * OpenClaw CSS Custom Properties Bridge
+ *
+ * Maps OpenClaw-specific variables to VS Code theme variables.
+ * Components use --openclaw-* variables internally;
+ * this file bridges them to VS Code's --vscode-* variables.
+ *
+ * Pattern adopted from vscode-trace-extension's trace-viewer.css
+ */
+
+:root {
+    /* Backgrounds */
+    --openclaw-background-primary: var(--vscode-editor-background);
+    --openclaw-background-secondary: var(--vscode-sideBar-background, var(--vscode-editor-background));
+    --openclaw-background-input: var(--vscode-input-background);
+    --openclaw-background-button: var(--vscode-button-background);
+    --openclaw-background-button-hover: var(--vscode-button-hoverBackground);
+    --openclaw-background-message-user: var(--vscode-button-background);
+    --openclaw-background-message-assistant: var(--vscode-textBlockQuote-background, rgba(255, 255, 255, 0.04));
+    --openclaw-background-message-system: var(--vscode-textPreformat-background, rgba(255, 255, 255, 0.08));
+
+    /* Foregrounds */
+    --openclaw-foreground-primary: var(--vscode-editor-foreground);
+    --openclaw-foreground-secondary: var(--vscode-descriptionForeground);
+    --openclaw-foreground-input: var(--vscode-input-foreground);
+    --openclaw-foreground-button: var(--vscode-button-foreground);
+    --openclaw-foreground-message-user: var(--vscode-button-foreground);
+    --openclaw-foreground-message-assistant: var(--vscode-editor-foreground);
+    --openclaw-foreground-placeholder: var(--vscode-input-placeholderForeground);
+
+    /* Borders */
+    --openclaw-border-primary: var(--vscode-panel-border, rgba(255, 255, 255, 0.1));
+    --openclaw-border-input: var(--vscode-input-border, rgba(255, 255, 255, 0.12));
+
+    /* Sizing */
+    --openclaw-font-size: var(--vscode-font-size, 13px);
+    --openclaw-font-family: var(--vscode-font-family);
+    --openclaw-padding-sm: 4px;
+    --openclaw-padding-md: 8px;
+    --openclaw-padding-lg: 12px;
+    --openclaw-radius-sm: 3px;
+    --openclaw-radius-md: 6px;
+
+    /* Layout */
+    --openclaw-sidebar-width: 100%;
+    --openclaw-input-min-height: 28px;
+    --openclaw-input-max-height: 120px;
+}

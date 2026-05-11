@@ -1,0 +1,60 @@
+/**
+ * Message List Component Styles
+ */
+
+.message-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--openclaw-padding-md);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.message-list__empty {
+    text-align: center;
+    opacity: 0.5;
+    padding: 24px;
+    font-size: var(--openclaw-font-size);
+}
+
+.message {
+    margin-bottom: 2px;
+    padding: 6px 10px;
+    border-radius: var(--openclaw-radius-md);
+    max-width: 85%;
+    font-size: var(--openclaw-font-size);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.message--user {
+    background: var(--openclaw-background-message-user);
+    color: var(--openclaw-foreground-message-user);
+    align-self: flex-end;
+}
+
+.message--assistant {
+    background: var(--openclaw-background-message-assistant);
+    color: var(--openclaw-foreground-message-assistant);
+    align-self: flex-start;
+}
+
+.message--system {
+    background: var(--openclaw-background-message-system);
+    color: var(--openclaw-foreground-primary);
+    align-self: center;
+    max-width: 90%;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.message--streaming .message__content::after {
+    content: '▌';
+    opacity: 0.6;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
