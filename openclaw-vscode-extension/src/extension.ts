@@ -128,7 +128,16 @@ async function connectToGateway(config?: GatewayConfig): Promise<void> {
 
     // Create new client
     gatewayClient = new GatewayClient(config);
-    
+
+    // Set up send handler for chat provider
+    if (chatProvider) {
+        chatProvider.setSendHandler(async (sessionKey: string, text: string) => {
+            if (gatewayClient?.isAuthenticated()) {
+                await gatewayClient.sendMessage(sessionKey, text);
+            }
+        });
+    }
+
     // Set up status handler
     gatewayClient.onStatus((status) => {
         const authenticated = gatewayClient?.isAuthenticated() ?? false;

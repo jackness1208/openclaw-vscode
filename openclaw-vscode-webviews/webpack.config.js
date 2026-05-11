@@ -1,5 +1,9 @@
 const path = require("path");
 const webpack = require("webpack");
+const CopyPlugin = require("copy-webpack-plugin");
+
+const codiconsCssPath = path.resolve(__dirname, '..', 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.css');
+const codiconsFontPath = path.resolve(__dirname, '..', 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.ttf');
 
 module.exports = {
   entry: {
@@ -12,10 +16,16 @@ module.exports = {
   devtool: "inline-source-map",
   resolve: {
     extensions: [".js", ".ts", ".tsx", ".json"],
+    alias: {
+      // vscode-messenger-webview's vscode-api.js is empty at runtime;
+      // this shim provides the global acquireVsCodeApi() from VS Code webview
+      "vscode-messenger-webview/lib/vscode-api": path.resolve(__dirname, "src/shims/vscode-api.ts")
+    },
     fallback: {
       "fs": false,
       "path": false,
-      "os": false
+      "os": false,
+      "crypto": false
     }
   },
   module: {
@@ -66,7 +76,13 @@ module.exports = {
       "process.env": {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV || "development")
       }
-    })
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: codiconsCssPath, to: "./codicons" },
+        { from: codiconsFontPath, to: "./codicons" }
+      ],
+    }),
   ],
   watchOptions: {
     aggregateTimeout: 2000,

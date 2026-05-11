@@ -3,8 +3,7 @@
  *
  * Licensed under the MIT license. See LICENSE file in the project root for details.
  ***************************************************************************************/
-// Note: copied from
-// https://github.com/eclipse-cdt-cloud/theia-trace-extension/blob/v0.7.2/scripts/typescript-references.js
+// Auto-generate TypeScript project references for yarn workspaces
 
 const cp = require('child_process')
 const fs = require('fs')

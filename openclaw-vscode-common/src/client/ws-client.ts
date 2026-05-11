@@ -10,18 +10,20 @@ export type WsMessageHandler = (data: unknown) => void;
 export type WsStatusHandler = (status: ConnectionStatus) => void;
 
 /**
- * WebSocket client with auto-reconnect
+ * WebSocket client with exponential backoff reconnection
  */
 export class WsClient {
     private ws: WebSocket | null = null;
     private url: string;
     private reconnectAttempts = 0;
-    private maxReconnectAttempts = 5;
-    private reconnectDelay = 1000;
+    private maxReconnectAttempts = 20;
+    private baseReconnectDelay = 1000;
+    private maxReconnectDelay = 30000;
+    private jitterMs = 1000;
+    private reconnectTimer: NodeJS.Timeout | null = null;
     private status: ConnectionStatus = 'disconnected';
     private messageHandlers: Map<string, WsMessageHandler[]> = new Map();
     private statusHandlers: Set<WsStatusHandler> = new Set();
-    private messageQueue: string[] = [];
 
     constructor(url: string) {
         this.url = url;
@@ -37,7 +39,7 @@ export class WsClient {
                 return;
             }
 
-            this.setStatus('connecting');
+            this.setStatus(this.reconnectAttempts > 0 ? 'reconnecting' : 'connecting');
 
             try {
                 this.ws = new WebSocket(this.url);
@@ -51,31 +53,23 @@ export class WsClient {
                 console.log('[WsClient] Connected');
                 this.setStatus('connected');
                 this.reconnectAttempts = 0;
-                
-                // Send queued messages
-                while (this.messageQueue.length > 0) {
-                    const msg = this.messageQueue.shift();
-                    if (msg && this.ws) {
-                        this.ws.send(msg);
-                    }
-                }
-                
+
                 resolve();
             };
 
-            this.ws.onclose = () => {
-                console.log('[WsClient] Disconnected');
+            this.ws.onclose = event => {
+                console.log('[WsClient] Disconnected, code:', event.code);
                 this.setStatus('disconnected');
                 this.handleReconnect();
             };
 
-            this.ws.onerror = (error) => {
+            this.ws.onerror = error => {
                 console.error('[WsClient] Error:', error);
                 this.setStatus('error');
                 reject(error);
             };
 
-            this.ws.onmessage = (event) => {
+            this.ws.onmessage = event => {
                 try {
                     const data = JSON.parse(event.data as string);
                     this.handleMessage(data);
@@ -90,6 +84,12 @@ export class WsClient {
      * Disconnect from WebSocket server
      */
     disconnect(): void {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+        this.reconnectAttempts = this.maxReconnectAttempts; // prevent reconnect
+
         if (this.ws) {
             this.ws.close();
             this.ws = null;
@@ -101,13 +101,10 @@ export class WsClient {
      * Send raw message
      */
     send(data: unknown): void {
-        const message = JSON.stringify(data);
-        
         if (this.ws?.readyState === WebSocket.OPEN) {
-            this.ws.send(message);
+            this.ws.send(JSON.stringify(data));
         } else {
-            // Queue message for later
-            this.messageQueue.push(message);
+            console.warn('[WsClient] WebSocket not connected, message dropped');
         }
     }
 
@@ -164,16 +161,27 @@ export class WsClient {
     }
 
     private handleMessage(data: unknown): void {
-        // Handle Gateway message format
         const msg = data as { type?: string; event?: string };
-        
+
+        // Handle shutdown event - stop reconnecting
+        if (msg.type === 'event' && msg.event === 'shutdown') {
+            console.log('[WsClient] Received shutdown event');
+            if (this.reconnectTimer) {
+                clearTimeout(this.reconnectTimer);
+                this.reconnectTimer = null;
+            }
+            this.reconnectAttempts = this.maxReconnectAttempts;
+            this.setStatus('disconnected');
+            return;
+        }
+
         if (msg.type === 'event' && msg.event) {
             const handlers = this.messageHandlers.get(msg.event);
             if (handlers) {
                 handlers.forEach(handler => handler(data));
             }
         }
-        
+
         // Also emit to 'message' handlers
         const messageHandlers = this.messageHandlers.get('message');
         if (messageHandlers) {
@@ -184,16 +192,24 @@ export class WsClient {
     private handleReconnect(): void {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             console.log('[WsClient] Max reconnect attempts reached');
+            this.setStatus('failed');
             return;
         }
 
         this.reconnectAttempts++;
-        const delay = this.reconnectDelay * this.reconnectAttempts;
-        
-        console.log(`[WsClient] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
-        
-        setTimeout(() => {
-            this.connect().catch(console.error);
+
+        // Exponential backoff with jitter (same as reference implementation)
+        const delay =
+            Math.min(this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts - 1), this.maxReconnectDelay) +
+            Math.random() * this.jitterMs;
+
+        console.log(`[WsClient] Reconnecting in ${Math.round(delay)}ms (attempt ${this.reconnectAttempts})`);
+
+        this.reconnectTimer = setTimeout(() => {
+            this.reconnectTimer = null;
+            this.connect().catch(error => {
+                console.error('[WsClient] Reconnect failed:', error);
+            });
         }, delay);
     }
 }

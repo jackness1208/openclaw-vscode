@@ -21,18 +21,26 @@ import {
  */
 export class ChatViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'openclaw.chatView';
-    
+
     private _view: vscode.WebviewView | undefined;
     private _webviewParticipant: WebviewIdMessageParticipant | undefined;
     private _agents: AgentInfo[] = [];
     private _currentAgentId: string = '';
     private _status: ConnectionStatus = 'disconnected';
     private _authenticated = false;
+    private _sendHandler: ((sessionKey: string, text: string) => Promise<void>) | null = null;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private readonly _messenger: Messenger
     ) {}
+
+    /**
+     * Set the handler for sending messages (called from extension.ts with gatewayClient)
+     */
+    setSendHandler(handler: (sessionKey: string, text: string) => Promise<void>): void {
+        this._sendHandler = handler;
+    }
 
     resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -40,16 +48,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken
     ): void {
         this._view = webviewView;
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        // Register webview to messenger
-        this._webviewParticipant = this._messenger.registerWebviewView(webviewView);
+        // Set options BEFORE setting HTML so scripts are allowed
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
                 vscode.Uri.joinPath(this._extensionUri, 'pack')
             ]
         };
+
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        // Register webview to messenger
+        this._webviewParticipant = this._messenger.registerWebviewView(webviewView);
 
         // Handle webview ready
         this._messenger.onNotification(webviewReady, () => {
@@ -89,8 +100,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         this._messenger.onRequest(
             { method: VSCODE_MESSAGES.SEND_MESSAGE } as RequestType<any, void>,
             async (params: { sessionKey: string; text: string }) => {
-                // This will be handled by the gateway client
-                console.log('[ChatViewProvider] Send message:', params);
+                if (this._sendHandler) {
+                    await this._sendHandler(params.sessionKey, params.text);
+                } else {
+                    console.warn('[ChatViewProvider] No send handler registered');
+                }
             },
             { sender: this._webviewParticipant }
         );
@@ -179,6 +193,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         const scriptUri = webview.asWebviewUri(
             vscode.Uri.joinPath(this._extensionUri, 'pack', 'chatPanel.js')
         );
+        const codiconsUri = webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'pack', 'codicons', 'codicon.css')
+        );
+        const packUri = webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'pack')
+        );
         const nonce = getNonce();
 
         return `<!DOCTYPE html>
@@ -187,10 +207,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
     <title>OpenClaw Chat</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource};">
+    <link href="${codiconsUri}" rel="stylesheet" />
+    <base href="${packUri}/">
 </head>
 <body>
     <div id="root"></div>
+    <script nonce="${nonce}">
+        window.onerror = function(msg, url, line, col, err) {
+            console.error('Webview error:', msg, url, line);
+        };
+        window.onunhandledrejection = function(e) {
+            console.error('Webview unhandled rejection:', e.reason);
+        };
+    </script>
     <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;

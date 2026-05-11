@@ -12,6 +12,19 @@ interface PendingRequest {
     timeout: NodeJS.Timeout;
 }
 
+/**
+ * RPC error with Gateway error code
+ */
+export class RpcError extends Error {
+    readonly code: string;
+
+    constructor(code: string, message: string) {
+        super(`RPC error ${code}: ${message}`);
+        this.name = 'RpcError';
+        this.code = code;
+    }
+}
+
 export type RpcMessageHandler = (data: unknown) => void;
 
 /**
@@ -20,7 +33,7 @@ export type RpcMessageHandler = (data: unknown) => void;
 export class RpcClient {
     private send: (data: unknown) => void;
     private pendingRequests: Map<string, PendingRequest> = new Map();
-    private defaultTimeout = 30000; // 30 seconds
+    private defaultTimeout = 10000; // 10 seconds (same as reference)
 
     constructor(sendFn: (data: unknown) => void) {
         this.send = sendFn;
@@ -31,22 +44,19 @@ export class RpcClient {
      */
     async request<T = unknown>(method: string, params?: Record<string, unknown>): Promise<T> {
         const id = uuidv4();
-        
+
         return new Promise((resolve, reject) => {
-            // Set up timeout
             const timeout = setTimeout(() => {
                 this.pendingRequests.delete(id);
                 reject(new Error(`RPC request timeout: ${method}`));
             }, this.defaultTimeout);
 
-            // Store pending request
             this.pendingRequests.set(id, {
                 resolve: resolve as (value: unknown) => void,
                 reject,
                 timeout
             });
 
-            // Send request
             const request: GatewayRequest = {
                 type: 'req',
                 id,
@@ -75,12 +85,12 @@ export class RpcClient {
             pending.resolve((response as GatewayResponseOk).payload);
         } else {
             const error = response.error;
-            pending.reject(new Error(`RPC error ${error.code}: ${error.message}`));
+            pending.reject(new RpcError(error.code, error.message));
         }
     }
 
     /**
-     * Set timeout for requests
+     * Set default timeout for requests
      */
     setTimeout(ms: number): void {
         this.defaultTimeout = ms;

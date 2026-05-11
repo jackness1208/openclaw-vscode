@@ -1,0 +1,61 @@
+/**
+ * Chat View Entry Styles
+ *
+ * View-level reset and layout, equivalent to the original
+ * vscode-trace-extension's per-view index.css files.
+ */
+
+@import '../style/openclaw-variables.css';
+
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    background: var(--openclaw-background-primary);
+    color: var(--openclaw-foreground-primary);
+    font-family: var(--openclaw-font-family);
+    font-size: var(--openclaw-font-size);
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Debug error panel */
+#error-panel {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #5a1d1d;
+    color: #ff6b6b;
+    padding: var(--openclaw-padding-md);
+    font-size: 12px;
+    max-height: 40%;
+    overflow-y: auto;
+    z-index: 9999;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+#error-panel.visible {
+    display: block;
+}
+
+/* Loading placeholder */
+.chat-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    opacity: 0.6;
+    font-size: var(--openclaw-font-size);
+}
