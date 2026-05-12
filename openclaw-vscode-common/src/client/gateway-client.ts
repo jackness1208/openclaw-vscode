@@ -22,6 +22,7 @@ import {
 
 export type ChatEventHandler = (payload: ChatEventPayload) => void;
 export type StatusHandler = (status: ConnectionStatus) => void;
+export type DebugHandler = (entry: { timestamp: number; direction: 'send' | 'recv'; type: string; data: unknown }) => void;
 
 /**
  * Gateway client with authentication, agent management, and chat
@@ -33,6 +34,7 @@ export class GatewayClient {
     private authenticated = false;
     private chatHandlers: Set<ChatEventHandler> = new Set();
     private statusHandlers: Set<StatusHandler> = new Set();
+    private debugHandlers: Set<DebugHandler> = new Set();
     private authResolve: (() => void) | null = null;
     private authReject: ((error: Error) => void) | null = null;
 
@@ -103,6 +105,14 @@ export class GatewayClient {
         this.statusHandlers.add(handler);
     }
 
+    onDebug(handler: DebugHandler): void {
+        this.debugHandlers.add(handler);
+    }
+
+    offDebug(handler: DebugHandler): void {
+        this.debugHandlers.delete(handler);
+    }
+
     // ========================================================================
     // Agent Management
     // ========================================================================
@@ -133,6 +143,7 @@ export class GatewayClient {
         await this.rpcClient.request('chat.send', {
             sessionKey,
             message: text,
+            deliver: false,
             idempotencyKey: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             attachments
         });
@@ -157,9 +168,10 @@ export class GatewayClient {
     // ========================================================================
 
     private setupEventHandlers(): void {
-        // Handle all messages
+        // Handle all messages — also emit debug logs
         this.wsClient.on('message', data => {
             const msg = data as GatewayMessage;
+            this.emitDebug('recv', msg.type || (msg as any).event || 'unknown', data);
 
             // Handle RPC responses
             if (msg.type === 'res') {
@@ -175,8 +187,8 @@ export class GatewayClient {
 
         // Handle chat events
         this.wsClient.on('chat', data => {
-            const payload = data as ChatEventPayload;
-            this.chatHandlers.forEach(handler => handler(payload));
+            const frame = data as { payload: ChatEventPayload };
+            this.chatHandlers.forEach(handler => handler(frame.payload));
         });
 
         // Handle status changes
@@ -189,6 +201,7 @@ export class GatewayClient {
     }
 
     private async handleConnectChallenge(challenge: ConnectChallengePayload): Promise<void> {
+        this.emitDebug('recv', 'connect.challenge', challenge);
         try {
             const role = 'operator';
             const scopes = ['operator.admin', 'operator.read'];
@@ -246,6 +259,7 @@ export class GatewayClient {
             }
 
             await this.rpcClient.request('connect', params);
+            this.emitDebug('send', 'connect', params);
 
             // Connection successful
             this.authenticated = true;
@@ -271,5 +285,10 @@ export class GatewayClient {
                 this.authReject = null;
             }
         }
+    }
+
+    private emitDebug(direction: 'send' | 'recv', type: string, data: unknown): void {
+        const entry = { timestamp: Date.now(), direction, type, data };
+        this.debugHandlers.forEach(handler => handler(entry));
     }
 }

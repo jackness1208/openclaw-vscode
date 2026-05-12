@@ -20,6 +20,13 @@ export interface Message {
   agentId?: string;
 }
 
+export interface DebugEntry {
+  timestamp: number;
+  direction: 'send' | 'recv';
+  type: string;
+  data: unknown;
+}
+
 export interface ChatState {
   // Agents
   agents: Agent[];
@@ -35,6 +42,10 @@ export interface ChatState {
   connectionStatus: string;
   authenticated: boolean;
   
+  // Debug
+  debugLogs: DebugEntry[];
+  isDebugVisible: boolean;
+  
   // Actions
   setAgents: (agents: Agent[]) => void;
   setCurrentAgent: (agentId: string) => void;
@@ -48,6 +59,10 @@ export interface ChatState {
   setConnectionStatus: (status: string, authenticated: boolean) => void;
   sendMessage: (text: string) => void;
   currentAgent: () => Agent | null;
+  addDebugLog: (entry: DebugEntry) => void;
+  clearDebugLogs: () => void;
+  toggleDebug: () => void;
+  setDebugVisible: (visible: boolean) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -60,6 +75,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isLoading: false,
   connectionStatus: 'disconnected',
   authenticated: false,
+  debugLogs: [],
+  isDebugVisible: false,
   
   // Actions
   setAgents: (agents) => {
@@ -131,5 +148,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     set({ isLoading: true, streamingContent: '' });
     // The actual sending is handled by ChatContainer via messageManager
+  },
+
+  addDebugLog: (entry: DebugEntry) => {
+    set(state => ({ debugLogs: [...state.debugLogs, entry] }));
+  },
+
+  clearDebugLogs: () => {
+    set({ debugLogs: [] });
+  },
+
+  toggleDebug: () => {
+    set(state => ({ isDebugVisible: !state.isDebugVisible }));
+  },
+
+  setDebugVisible: (visible: boolean) => {
+    set({ isDebugVisible: visible });
   }
 }));

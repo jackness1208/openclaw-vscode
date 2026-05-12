@@ -29,6 +29,9 @@ export const VSCODE_MESSAGES = {
     MESSAGE_LIST: 'messageList',
     CLEAR_CHAT: 'clearChat',
     
+    // Debug
+    DEBUG_LOG: 'debugLog',
+    
     // Error
     ERROR: 'error'
 };
@@ -67,6 +70,11 @@ export const messageList: NotificationType<{ messages: ChatMessageItem[] }> = {
 // Error
 export const error: NotificationType<{ message: string }> = { 
     method: VSCODE_MESSAGES.ERROR 
+};
+
+// Debug
+export const debugLog: NotificationType<DebugLogMessage> = { 
+    method: VSCODE_MESSAGES.DEBUG_LOG 
 };
 
 // ============================================================================
@@ -124,4 +132,11 @@ export interface ChatEventMessage {
     errorMessage?: string;
     errorKind?: string;
     stopReason?: string;
+}
+
+export interface DebugLogMessage {
+    timestamp: number;
+    direction: 'send' | 'recv';
+    type: string;
+    data: unknown;
 }

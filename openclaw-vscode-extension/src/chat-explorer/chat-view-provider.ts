@@ -13,8 +13,10 @@ import {
     gatewayStatus,
     agentList,
     chatEvent,
-    currentAgent
+    currentAgent,
+    debugLog
 } from 'openclaw-vscode-common/lib/messages/vscode-messages';
+import { DebugLogMessage } from 'openclaw-vscode-common';
 
 /**
  * Chat view provider for OpenClaw sidebar
@@ -165,6 +167,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     handleChatEvent(payload: ChatEventPayload): void {
         if (this._view && this._webviewParticipant) {
             this._sendNotification(chatEvent, payload as any);
+        }
+    }
+
+    sendDebugLog(entry: DebugLogMessage): void {
+        if (this._view && this._webviewParticipant) {
+            this._sendNotification(debugLog, entry);
         }
     }
 

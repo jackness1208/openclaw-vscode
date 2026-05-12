@@ -9,7 +9,8 @@ import {
     GatewayClient, 
     readOpenClawConfig, 
     configExists,
-    GatewayConfig
+    GatewayConfig,
+    DebugLogMessage
 } from 'openclaw-vscode-common';
 import { ChatViewProvider } from './chat-explorer/chat-view-provider';
 import { GatewayStatusBar } from './utils/gateway-status-bar';
@@ -153,6 +154,13 @@ async function connectToGateway(config?: GatewayConfig): Promise<void> {
     gatewayClient.onChat((payload) => {
         if (chatProvider) {
             chatProvider.handleChatEvent(payload);
+        }
+    });
+
+    // Set up debug handler
+    gatewayClient.onDebug((entry: DebugLogMessage) => {
+        if (chatProvider) {
+            chatProvider.sendDebugLog(entry);
         }
     });
 

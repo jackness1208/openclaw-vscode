@@ -80,6 +80,11 @@ messageManager.onChatEvent((data) => {
     }
 });
 
+// Debug log listener
+messageManager.onDebugLog((data) => {
+    useChatStore.getState().addDebugLog(data);
+});
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
     <React.StrictMode>

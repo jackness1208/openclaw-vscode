@@ -12,12 +12,13 @@ import {
     chatEvent,
     messageList,
     error,
+    debugLog,
     getAgents,
     sendMessage as sendMessageType,
     switchAgent,
     clearChat
 } from 'openclaw-vscode-common/lib/messages/vscode-messages';
-import type { AgentMessage, ChatEventMessage, ChatMessageItem } from 'openclaw-vscode-common/lib/messages/vscode-messages';
+import type { AgentMessage, ChatEventMessage, ChatMessageItem, DebugLogMessage } from 'openclaw-vscode-common/lib/messages/vscode-messages';
 
 export class VsCodeMessageManager {
     private messenger: Messenger;
@@ -84,5 +85,9 @@ export class VsCodeMessageManager {
 
     onError(callback: (data: { message: string }) => void): void {
         this.messenger.onNotification(error, callback);
+    }
+
+    onDebugLog(callback: (data: DebugLogMessage) => void): void {
+        this.messenger.onNotification(debugLog, callback);
     }
 }
