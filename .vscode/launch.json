@@ -8,11 +8,11 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}/vscode-trace-extension"
+                "--extensionDevelopmentPath=${workspaceFolder}/openclaw-vscode-extension"
             ],
             "outFiles": [
-                "${workspaceFolder}/vscode-trace-extension/pack/*.js",
-                "${workspaceFolder}/vscode-trace-extension/lib/**/*.js"
+                "${workspaceFolder}/openclaw-vscode-extension/pack/*.js",
+                "${workspaceFolder}/openclaw-vscode-extension/lib/**/*.js"
             ],
             "sourceMaps": true
         }
